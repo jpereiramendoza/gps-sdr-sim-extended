@@ -12,7 +12,7 @@ En Linux
 make
 ```
 
-Genera el binario `gps-sdr-sim-ext`
+Esto genera el binario `gps-sdr-sim-ext`
 
 Para limpiar los archivos objetos y realizar una nueva compilación
 
@@ -20,7 +20,7 @@ Para limpiar los archivos objetos y realizar una nueva compilación
 make clean
 ```
 
-## Archivo de parametros (cfg)
+## Archivo de parametros (.cfg)
 
 Se realizo una modificacion al programa origina, el parametro `-C` permite entregar un archivo de configuracion (por ejemplo 'config.cfg' ) el cual puede tener los parametros entregado por linea de comando 
 
@@ -41,6 +41,8 @@ power    = 128
 verbose  = 1
 seed     = 12345
 ```
+
+Esto no reemplaza la linea de comandos normal, la cual se puede seguir utilizando de forma normal. De todas formas, si se requiere usar las nuevas funcionalidades, se debe utilizar un archivo de configuración. 
 
 ## Ruido térmico equivalente
 

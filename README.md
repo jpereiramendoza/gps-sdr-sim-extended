@@ -58,6 +58,34 @@ Este parámetro fija una relación potencia de señal / potencia de ruido de 45 
 
 El ruido se aplica de forma constante sobre toda la señal I/Q, lo que permite emular de manera más realista las condiciones de recepción en un receptor GNSS real.
 
+### Cómo se calcula
+
+El modelo utiliza ruido blanco gaussiano aditivo (AWGN) complejo ajustado al SNR indicado:
+
+- Se estima la potencia media de la señal ideal (sin ruido) sobre una ventana inicial de muestras (por defecto 50.000 muestras):
+```  
+  P_signal = media( I^2 + Q^2 )
+```
+- Se convierte el valor de `NOISE_SNR` de dB a escala lineal:
+```
+  SNR_lin = 10^( NOISE_SNR / 10 )
+```
+- Se calcula la potencia de ruido objetivo:
+```
+  P_noise = P_signal / SNR_lin
+```
+- A partir de `P_noise` se obtiene la desviación estándar del ruido para cada componente (I y Q) del ruido complejo:
+```
+  sigma = sqrt( P_noise / 2 )
+```
+- Para cada muestra se generan valores gaussianos con media 0 y desviación sigma que se suman a la señal ideal:
+```
+  I_out = I_ideal + n_I
+  Q_out = Q_ideal + n_Q
+```
+
+De este modo, la señal I/Q resultante mantiene aproximadamente la relación señal/ruido especificada en `NOISE_SNR`, emulando el ruido térmico equivalente de un receptor GNSS real.
+
 
 ## Implementación de multicamino
 
@@ -152,7 +180,9 @@ PRN 23 # Este multicamino se suma al anterior, con menor amplitud
 
 Actualmente, el simulador implementa:
 
-- Lectura de un archivo de configuración de multicamino.
+- Implementacion de archivo Make para compilacion.
+- Lectura de un archivo de configuración de parametros.
+- Implementacion de ruido termico equivalente mediante AWGN
 - Interpretación de líneas `SIM`, que permiten definir ecos fijos (retardo, fase y amplitud constantes) por satélite.
 
 Las líneas `ECH` y `PRN` están ya definidas en el formato de configuración, pero su modelo interno todavía está en desarrollo y su efecto puede ser limitado o no estar completamente implementado. Se recomienda, por ahora, utilizar principalmente líneas `SIM` para pruebas y experimentación reproducible.

@@ -86,6 +86,62 @@ El modelo utiliza ruido blanco gaussiano aditivo (AWGN) complejo ajustado al SNR
 
 De este modo, la señal I/Q resultante mantiene aproximadamente la relación señal/ruido especificada en `NOISE_SNR`, emulando el ruido térmico equivalente de un receptor GNSS real.
 
+## Filtro FIR digital (modo baseband)
+
+El simulador incluye un filtro FIR pasa-bajos opcional para modelar el comportamiento del front-end digital de un receptor GNSS real.  
+Su objetivo es limitar la banda efectiva de la señal I/Q, reducir aliasing y suavizar el espectro antes de la cuantización final.
+
+### ¿Qué hace el filtro?
+
+- Aplica un filtrado **pasa-bajos** de fase lineal sobre las muestras I/Q.
+- Mantiene la integridad temporal del código GNSS (no distorsiona la forma del chip).
+- Modela el filtrado digital típico de un front-end GNSS (FIR simétrico).
+- Reduce energía fuera de banda y mejora la relación señal-ruido en la banda útil.
+
+### Cómo se implementa
+
+1. El usuario define:
+   - Frecuencia de muestreo `fs`
+   - Frecuencia de corte `fc`
+   - Número de taps `N` (debe ser impar)
+
+2. Al iniciar el programa:
+   - Se generan los taps mediante:
+     - **sinc recortada** centrada en cero  
+     - **ventana Hamming**  
+     - **normalización** para obtener ganancia unitaria
+   - Estos coeficientes permanecen fijos durante toda la ejecución.
+
+3. Durante la generación de cada muestra:
+   - Se mantiene un buffer con las últimas `N` muestras I/Q.
+   - La salida filtrada se obtiene con la convolución:
+     ```
+     y[n] = Σ h[k] · x[n−k]
+     ```
+   - El resultado reemplaza a la muestra I/Q antes de la cuantización final.
+
+### Detalles importantes
+
+- El filtro solo es válido si se cumple:
+
+```
+0 < fc < fs / 2
+```
+(condición de Nyquist)
+
+- Al ser un FIR simétrico:
+- tiene **fase lineal perfecta**, solo introduce retraso fijo  
+- no deforma el pico de correlación GNSS  
+- es completamente estable (sin realimentación)
+
+- El retardo del filtro es:
+
+```
+delay = (N - 1) / 2 muestras
+```
+
+- El filtrado se realiza **después del escalamiento AGC inicial** pero **antes de la cuantización final**.
+
 
 ## Implementación de multicamino
 
@@ -181,7 +237,7 @@ PRN 23 # Este multicamino se suma al anterior, con menor amplitud
 Actualmente, el simulador implementa:
 
 - Implementacion de archivo Make para compilacion.
-- Lectura de un archivo de configuración de parametros.
+- Lectura de archivo de configuración con parametros.
 - Implementacion de ruido termico equivalente mediante AWGN
 - Interpretación de líneas `SIM`, que permiten definir ecos fijos (retardo, fase y amplitud constantes) por satélite.
 

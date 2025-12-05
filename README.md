@@ -88,9 +88,15 @@ De este modo, la señal I/Q resultante mantiene aproximadamente la relación se�
 
 ## Filtro FIR digital (modo baseband)
 
-El simulador incluye un filtro FIR pasa-bajos opcional para modelar el comportamiento del front-end digital de un receptor GNSS real.  
+El simulador incluye un filtro FIR pasa-bajos opcional para modelar el comportamiento del front-end digital de un receptor GNSS real. 
+
 Su objetivo es limitar la banda efectiva de la señal I/Q, reducir aliasing y suavizar el espectro antes de la cuantización final.
 
+**Sintaxis**
+
+```
+FIL FREC_CORTE TAPS
+```
 ### ¿Qué hace el filtro?
 
 - Aplica un filtrado **pasa-bajos** de fase lineal sobre las muestras I/Q.
@@ -107,8 +113,8 @@ Su objetivo es limitar la banda efectiva de la señal I/Q, reducir aliasing y su
 
 2. Al iniciar el programa:
    - Se generan los taps mediante:
-     - **sinc recortada** centrada en cero  
-     - **ventana Hamming**  
+     - **sinc recortada** centrada en cero 
+     - **ventana Hamming** 
      - **normalización** para obtener ganancia unitaria
    - Estos coeficientes permanecen fijos durante toda la ejecución.
 
@@ -124,10 +130,10 @@ Su objetivo es limitar la banda efectiva de la señal I/Q, reducir aliasing y su
 
 - El filtro solo es válido si se cumple:
 
-```
-0 < fc < fs / 2
-```
-(condición de Nyquist)
+	```
+	0 < fc < fs / 2
+	```
+	(condición de Nyquist)
 
 - Al ser un FIR simétrico:
 - tiene **fase lineal perfecta**, solo introduce retraso fijo  
@@ -135,13 +141,10 @@ Su objetivo es limitar la banda efectiva de la señal I/Q, reducir aliasing y su
 - es completamente estable (sin realimentación)
 
 - El retardo del filtro es:
-
-```
-delay = (N - 1) / 2 muestras
-```
-
+	```
+	delay = (N - 1) / 2 muestras
+	```
 - El filtrado se realiza **después del escalamiento AGC inicial** pero **antes de la cuantización final**.
-
 
 ## Implementación de multicamino
 
